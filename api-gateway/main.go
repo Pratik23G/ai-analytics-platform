@@ -5,9 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/time/rate"
@@ -82,8 +84,12 @@ func health(w http.ResponseWriter, r *http.Request) {
 }
 
 func predict(w http.ResponseWriter, r *http.Request) {
+	// Option A: randomize features so score (and avg) changes
 	payload := map[string]any{
-		"features": []float64{12.3, 45.6},
+		"features": []float64{
+			rand.Float64() * 100,
+			rand.Float64() * 100,
+		},
 	}
 
 	body, _ := json.Marshal(payload)
@@ -139,6 +145,9 @@ func stats(w http.ResponseWriter, r *http.Request) {
 // ---------- Main ----------
 
 func main() {
+	// Seed RNG once at startup (so features change each request)
+	rand.Seed(time.Now().UnixNano())
+
 	rdb = redisClient()
 
 	// IMPORTANT: Order matters => CORS → Security → Handler
