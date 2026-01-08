@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ML service
+        run: docker build -t ml-service:latest ./ml-service
+
+      - name: Build API gateway
+        run: docker build -t api-gateway:latest ./api-gateway
+
+      - name: Build Producer
+        run: docker build -t producer:latest ./producer
